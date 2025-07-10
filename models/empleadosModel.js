@@ -6,23 +6,24 @@ const Empleado = {
       dni, nombre, apellido, cargo, salario, id_seccion, id_sucursal, turno 
     } = empleado;
     
+    // Llamada al procedimiento almacenado
     const [result] = await pool.query(
-      `INSERT INTO empleados (
-        dni, nombre, apellido, cargo, fecha_contratacion, salario, 
-        id_seccion, id_sucursal, turno
-      ) VALUES (?, ?, ?, ?, CURDATE(), ?, ?, ?, ?)`,
+      `CALL Empleado_Create(?, ?, ?, ?, ?, ?, ?, ?)`,
       [dni, nombre, apellido, cargo, salario, id_seccion, id_sucursal, turno]
     );
-    return result.insertId;
+    
+    // Para obtener el ID insertado necesitamos una segunda consulta
+    const [idResult] = await pool.query('SELECT LAST_INSERT_ID() as insertId');
+    return idResult[0].insertId;
   },
 
   findAll: async () => {
-    const [rows] = await pool.query('SELECT * FROM empleados');
+    const [rows] = await pool.query('CALL Empleado_ReadAll()');
     return rows;
   },
 
   findById: async (id) => {
-    const [rows] = await pool.query('SELECT * FROM empleados WHERE id_empleado = ?', [id]);
+    const [rows] = await pool.query('CALL Empleado_Read(?)', [id]);
     return rows[0];
   },
 
@@ -35,19 +36,19 @@ const Empleado = {
     const { 
       dni, nombre, apellido, cargo, salario, id_seccion, id_sucursal, turno 
     } = empleado;
-    
-    const [result] = await pool.query(
-      `UPDATE empleados SET 
+        /*   `UPDATE empleados SET 
         dni = ?, nombre = ?, apellido = ?, cargo = ?, salario = ?,
         id_seccion = ?, id_sucursal = ?, turno = ?
-      WHERE id_empleado = ?`,
-      [dni, nombre, apellido, cargo, salario, id_seccion, id_sucursal, turno, id]
+      WHERE id_empleado = ?`, */
+    const [result] = await pool.query(
+      'CALL Empleado_Update(?,?,?,?,?,?,?,?,?)',
+      [id,dni, nombre, apellido, cargo, salario, id_seccion, id_sucursal, turno]
     );
     return result.affectedRows > 0;
   },
 
   delete: async (id) => {
-    const [result] = await pool.query('DELETE FROM empleados WHERE id_empleado = ?', [id]);
+    const [result] = await pool.query('CALL Empleado_Delete(?)', [id]);
     return result.affectedRows > 0;
   }
 };

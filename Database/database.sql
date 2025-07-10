@@ -658,6 +658,14 @@ BEGIN
     SELECT * FROM promociones WHERE id_promocion = p_id;
 END$$
 
+
+CREATE PROCEDURE Promocion_ReadAll()
+BEGIN
+    SELECT * FROM promociones;
+END$$
+
+
+
 CREATE PROCEDURE Promocion_ReadByProducto(IN p_id_producto INT)
 BEGIN
     SELECT * FROM promociones WHERE id_producto = p_id_producto;
