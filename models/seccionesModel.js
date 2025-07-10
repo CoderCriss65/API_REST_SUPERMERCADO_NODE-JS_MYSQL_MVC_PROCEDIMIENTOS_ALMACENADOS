@@ -3,20 +3,25 @@ const pool = require('../config/db');
 const Seccion = {
   create: async (seccion) => {
     const { nombre, id_sucursal, temperatura_controlada } = seccion;
+    // 'INSERT INTO secciones (nombre, id_sucursal, temperatura_controlada) VALUES (?, ?, ?)',
     const [result] = await pool.query(
-      'INSERT INTO secciones (nombre, id_sucursal, temperatura_controlada) VALUES (?, ?, ?)',
-      [nombre, id_sucursal, temperatura_controlada]
+          'CALL Seccion_Create(?,?,?)',
+         [nombre, id_sucursal, temperatura_controlada]
     );
-    return result.insertId;
+     // Para obtener el ID de LASECCION INSERTADA 
+     const [rows] = await pool.query('SELECT LAST_INSERT_ID() as insertId');
+     return rows[0].insertId;
   },
 
   findAll: async () => {
-    const [rows] = await pool.query('SELECT * FROM secciones');
+    const [rows] = await pool.query('CALL  Seccion_ReadAll()');
     return rows;
   },
 
+
+
   findById: async (id) => {
-    const [rows] = await pool.query('SELECT * FROM secciones WHERE id_seccion = ?', [id]);
+    const [rows] = await pool.query(' CALL Seccion_Read(?)', [id]);
     return rows[0];
   },
 
@@ -27,15 +32,16 @@ const Seccion = {
 
   update: async (id, seccion) => {
     const { nombre, id_sucursal, temperatura_controlada } = seccion;
-    const [result] = await pool.query(
-      'UPDATE secciones SET nombre = ?, id_sucursal = ?, temperatura_controlada = ? WHERE id_seccion = ?',
-      [nombre, id_sucursal, temperatura_controlada, id]
+    //    'UPDATE secciones SET nombre = ?, id_sucursal = ?, temperatura_controlada = ? WHERE id_seccion = ?',
+   
+    const [result] = await pool.query('CALL Seccion_Update(?,?,?,?)',
+     [id,nombre, id_sucursal, temperatura_controlada]
     );
     return result.affectedRows > 0;
   },
 
   delete: async (id) => {
-    const [result] = await pool.query('DELETE FROM secciones WHERE id_seccion = ?', [id]);
+    const [result] = await pool.query('CALL Seccion_Delete(?)', [id]);
     return result.affectedRows > 0;
   }
 };
